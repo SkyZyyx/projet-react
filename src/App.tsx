@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import TodoItem from "./TodoItem";
 
 type Priority = "basse" | "moyenne" | "urgente";
 
@@ -9,7 +10,7 @@ type Todo = {
 }
 
 function App() {
-  function AddTodo(){
+  function addTodo(){
       if(input.trim() == ""){
   
         return;
@@ -29,11 +30,19 @@ const savedTodos = localStorage.getItem("todos");
 const initialTodos = savedTodos ? JSON.parse(savedTodos) : [];
 const  [input , setInput] = useState<string>("");
 const  [priority , setPriority] = useState<Priority>("moyenne");
-const [todos , setTodos] = useState<Todo[]>([initialTodos]);
+const [todos , setTodos] = useState<Todo[]>(initialTodos);
+const [filter , setFilter] = useState<Priority | "tous">("tous");
 useEffect(() => {
   localStorage.setItem("todos", JSON.stringify(todos));
   
 }, [todos])
+let filteredTodos : Todo[] = [];
+if(filter === "tous"){
+  filteredTodos = todos;
+}else{
+  filteredTodos = todos.filter(todo => todo.priority === filter);
+}
+
 
   return (
     <div className='flex justify-center'>
@@ -47,7 +56,22 @@ useEffect(() => {
             <option value="moyenne">Moyenne</option>
             <option value="urgente">Urgente</option>
           </select>
-          <button className="btn btn-primary" onClick={AddTodo}>Ajouter</button>
+          <button className="btn btn-primary" onClick={addTodo}>Ajouter</button>
+              
+            </div>
+          <div className="space-y-2 flex-1 h-fit ">
+            <div className="flex flex-wrap gap-4">
+              <button className={`btn btn-soft ${filter==="tous" ? "btn btn-primary" : ""}`}
+              onClick={() => setFilter("tous")}>Tous</button>
+          </div>
+          {filteredTodos.length > 0 ? (
+            <ul className="divide-y divide-primary/50">{filteredTodos.map((todo) => (
+              
+              <TodoItem todo={todo}/>
+            ))}</ul>
+          ):(
+          <div>Aucune tâche trouvée</div>
+          )}
         </div>
       </div>
       
